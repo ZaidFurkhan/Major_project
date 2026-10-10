@@ -1,0 +1,19 @@
+# Do not commit secrets. Only .env.example is tracked.
+node_modules/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+.expo/
+*.log
+coverage/
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
