@@ -2,4 +2,7 @@
 
 Node.js and Express API, MQTT ingestion, WebSocket broadcast.
 
-Status: not yet implemented.
+Status: health endpoint skeleton only.
+
+## Test
+npm test (run from backend/)
