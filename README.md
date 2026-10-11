@@ -10,6 +10,12 @@ AI-assisted predictive-maintenance and fault diagnosis for a motor test rig. Mon
 - database/: PostgreSQL schema and migrations
 - docs/: project documentation
 
-Status: Scaffolding only. No components are runnable yet.
+Status: see the Current status section below.
+
+## Current status
+The project is in active development and not yet runnable as a complete system.
+Backend capabilities: health endpoint, PostgreSQL schema and migrations, MQTT telemetry ingestion, WebSocket live delivery, and latest-reading REST endpoint.
+AI service: health endpoint only.
+See docs/PROGRESS.md for the full status and next steps.
 
 Note: Simulated telemetry and real sensor data must always be distinguishable.
