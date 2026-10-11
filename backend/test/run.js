@@ -4,7 +4,24 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import EmbeddedPostgres from 'embedded-postgres';
+
+async function findTestFiles(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await findTestFiles(fullPath)));
+    } else if (entry.isFile() && entry.name.endsWith('.test.js')) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
 
 async function main() {
   if (process.env.TEST_DATABASE_READY === '1' || process.execArgv.some((arg) => arg.startsWith('--test'))) {
@@ -16,6 +33,14 @@ async function main() {
   let exitCode = 1;
 
   try {
+    const testDir = path.dirname(fileURLToPath(import.meta.url));
+    const testFiles = (await findTestFiles(testDir)).sort();
+
+    if (testFiles.length === 0) {
+      console.error('no test files found');
+      process.exit(1);
+    }
+
     const freePort = await new Promise((resolve, reject) => {
       const server = net.createServer();
       server.listen(0, '127.0.0.1', () => {
@@ -52,7 +77,7 @@ async function main() {
     };
 
     exitCode = await new Promise((resolve) => {
-      const child = spawn('node', ['--test', '--test-concurrency=1'], {
+      const child = spawn('node', ['--test', '--test-concurrency=1', ...testFiles], {
         env: childEnv,
         stdio: 'inherit',
       });
