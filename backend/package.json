@@ -12,7 +12,9 @@
     "db:migrate": "node src/db/migrate.js"
   },
   "dependencies": {
+    "aedes": "^1.2.0",
     "express": "^5.3.0",
+    "mqtt": "^5.16.0",
     "pg": "^8.23.1"
   },
   "devDependencies": {
