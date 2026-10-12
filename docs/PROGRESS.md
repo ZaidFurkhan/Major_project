@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 12, 2026, the repository contains 21 commits on main, 75 passing backend tests across 11 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, and deterministic anomaly detection is implemented, while AI analysis and mobile interfaces remain in early scaffolding.
+As of October 12, 2026, the repository contains 24 commits on main, 88 passing backend tests across 12 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, and candidate-cause diagnosis is implemented, while AI service integrations, repair workflows, and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -33,14 +33,17 @@ As of October 12, 2026, the repository contains 21 commits on main, 75 passing b
 | 2026-10-12 | aebc51b | Staleness rule and WebSocket telemetry broadcaster (pushed to origin/main) |
 | 2026-10-12 | 4872d03 | Latest telemetry REST endpoint with staleness flag (pushed to origin/main) |
 | 2026-10-12 | b4237f0 | Wire live telemetry delivery into server startup (pushed to origin/main) |
+| 2026-10-12 | d403332 | Keep simulator baseline window free of fault ramp (pushed to origin/main) |
+| 2026-10-12 | a522b7a | Add explainable anomaly detector for telemetry windows (pushed to origin/main) |
+| 2026-10-12 | 3105dbb | Update progress document with live delivery and anomaly detection (pushed to origin/main) |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The deterministic anomaly detection step is implemented in the local working tree and planned for commit. It adds 12 tests, raising the backend test total from 63 to 75:
+The candidate-cause diagnosis module is implemented in the local working tree and planned for commit. It adds 13 tests, raising the backend test total from 75 to 88:
 
-- backend/src/analysis/anomalyDetector.js: pure deterministic anomaly detector evaluating validated telemetry windows against placeholder fault thresholds.
-- backend/src/simulator/simulator.js: fixed progressive scenario ramp formula so baseline steps 0 to 9 are pure normal operation and full anomaly magnitude is reached at step 40.
-- backend/test/analysis/anomalyDetector.test.js: unit tests for detection across scenarios, input validation, data requirements, and determinism (12 tests).
+- backend/src/diagnosis/candidateRules.js: candidate cause definitions and contradiction rules mapped from telemetry signatures.
+- backend/src/diagnosis/diagnose.js: deterministic candidate-cause diagnosis evaluating anomalies, supporting evidence, contradictions, and uncertainty.
+- backend/test/diagnosis/diagnose.test.js: unit tests for candidate diagnosis across scenarios, contradictions, ordering, and data sources (13 tests).
 
 ## 5. Architecture as Built
 
@@ -50,7 +53,8 @@ The deterministic anomaly detection step is implemented in the local working tre
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
 - WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
 - Simulator: built. Generates seeded deterministic readings for normal operation and four anomaly scenarios.
-- Anomaly detection: partial (rules implemented, no AI service integration, no diagnosis).
+- Anomaly detection: built. Deterministic window analysis evaluating measurement evidence against threshold rules.
+- Diagnosis: partial (candidate rules implemented; no AI service, no RAG, no repair guidance).
 
 ## 6. Decisions Made
 
@@ -61,9 +65,11 @@ The deterministic anomaly detection step is implemented in the local working tre
 - Placeholder simulator thresholds: defined solely to make simulated fault scenarios statistically distinguishable, not as calibrated engineering limits.
 - Single-branch trunk workflow: development proceeds directly on main with focused commits, avoiding merge overhead.
 - Anomaly detection runs in the Node backend as a pure module for now, and it may move to the AI service later behind the same function contract: keeps the first analysis step testable without a second service.
+- Diagnosis uses fixed candidate rules, not a language model, and presents every candidate as a possibility with a check to run: the system must not claim certainty it does not have.
 
 ## 7. Known Issues
 
+- The anomaly detector's default 20-reading window reaches only part of full fault magnitude on the simulator, so detection margins are thin; and simulated data cannot support real machine decisions.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
 - pgvector is not available in the embedded PostgreSQL package, requiring an alternative environment or service for vector embeddings during RAG implementation.
@@ -92,8 +98,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the anomaly detection module and simulator ramp fix once approved.
-2. Build the diagnosis module mapping detected anomalies to probable root causes with supporting sensor evidence.
+1. Commit the diagnosis module once approved.
+2. Build the Repair Guide data model and its screen as the next item.
 3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
 4. Create the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
 5. Build maintenance report generation, followed by ESP32 sensor hardware integration.
