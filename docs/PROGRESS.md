@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 11, 2026, the repository contains 17 commits on main, 63 passing backend tests across 10 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, and latest-reading REST query is implemented, while AI analysis and mobile interfaces remain in early scaffolding.
+As of October 12, 2026, the repository contains 21 commits on main, 75 passing backend tests across 11 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, and deterministic anomaly detection is implemented, while AI analysis and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -29,21 +29,18 @@ As of October 11, 2026, the repository contains 17 commits on main, 63 passing b
 | 2026-10-11 | bb3e193 | Telemetry readings database migration and repository queries |
 | 2026-10-11 | 8d75e83 | MQTT telemetry ingestion message handler and client dependencies |
 | 2026-10-11 | 837b6a6 | MQTT ingestion test suite using in-process Aedes broker |
+| 2026-10-11 | aa41b71 | Progress tracking documentation and status update (pushed to origin/main) |
+| 2026-10-12 | aebc51b | Staleness rule and WebSocket telemetry broadcaster (pushed to origin/main) |
+| 2026-10-12 | 4872d03 | Latest telemetry REST endpoint with staleness flag (pushed to origin/main) |
+| 2026-10-12 | b4237f0 | Wire live telemetry delivery into server startup (pushed to origin/main) |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The live telemetry delivery step is implemented in the local working tree and planned for commit tomorrow. It adds 10 tests, raising the backend test total from 53 to 63:
+The deterministic anomaly detection step is implemented in the local working tree and planned for commit. It adds 12 tests, raising the backend test total from 63 to 75:
 
-- backend/src/realtime/staleness.js: staleness calculation and 5-second freshness window.
-- backend/src/realtime/telemetryBroadcaster.js: WebSocket server handling upgrades on /ws/telemetry and broadcasting stored readings.
-- backend/src/api/telemetry.routes.js: Express router exposing GET /api/telemetry/:machineId/latest with age and staleness.
-- backend/src/app.js: mounts telemetry routes when database pool is provided in options.
-- backend/src/server.js: wires HTTP server, database pool, WebSocket broadcaster, and MQTT ingestion.
-- backend/package.json and backend/package-lock.json: added ws dependency for WebSocket support.
-- backend/test/realtime/staleness.test.js: unit tests for timestamp age and staleness evaluation (3 tests).
-- backend/test/realtime/telemetryBroadcaster.test.js: tests for WebSocket connection, hello handshake, and broadcast filtering (2 tests).
-- backend/test/api/telemetryRoutes.test.js: tests for latest reading REST route status codes and error responses (4 tests).
-- backend/test/realtime/liveDelivery.test.js: end-to-end integration test verifying MQTT ingestion, WebSocket broadcast, and REST query (1 test).
+- backend/src/analysis/anomalyDetector.js: pure deterministic anomaly detector evaluating validated telemetry windows against placeholder fault thresholds.
+- backend/src/simulator/simulator.js: fixed progressive scenario ramp formula so baseline steps 0 to 9 are pure normal operation and full anomaly magnitude is reached at step 40.
+- backend/test/analysis/anomalyDetector.test.js: unit tests for detection across scenarios, input validation, data requirements, and determinism (12 tests).
 
 ## 5. Architecture as Built
 
@@ -51,8 +48,9 @@ The live telemetry delivery step is implemented in the local working tree and pl
 - AI service (Python/FastAPI): partial. Only health and 404 endpoints are implemented.
 - PostgreSQL schema: built. Machines, service cases, and telemetry readings tables with indexes.
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
-- WebSocket delivery: built. In working tree, broadcasts stored readings to connected clients on /ws/telemetry.
+- WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
 - Simulator: built. Generates seeded deterministic readings for normal operation and four anomaly scenarios.
+- Anomaly detection: partial (rules implemented, no AI service integration, no diagnosis).
 
 ## 6. Decisions Made
 
@@ -62,10 +60,10 @@ The live telemetry delivery step is implemented in the local working tree and pl
 - Explicit source labeling: readings are tagged as simulated or sensor to ensure synthetic data is never mistaken for physical hardware readings.
 - Placeholder simulator thresholds: defined solely to make simulated fault scenarios statistically distinguishable, not as calibrated engineering limits.
 - Single-branch trunk workflow: development proceeds directly on main with focused commits, avoiding merge overhead.
+- Anomaly detection runs in the Node backend as a pure module for now, and it may move to the AI service later behind the same function contract: keeps the first analysis step testable without a second service.
 
 ## 7. Known Issues
 
-- The simulator ramp begins at step 0, so the initial baseline window includes a small portion of the anomaly transition. Test assertions pass, but the measured difference is slightly understated.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
 - pgvector is not available in the embedded PostgreSQL package, requiring an alternative environment or service for vector embeddings during RAG implementation.
@@ -94,12 +92,11 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the working tree live delivery files across three commits: staleness and broadcaster; REST endpoint; server wiring and end-to-end test.
-2. Implement anomaly detection to identify the four motor fault signatures from simulated telemetry streams, with comprehensive tests.
-3. Build the diagnosis module mapping detected anomalies to probable root causes with supporting sensor evidence.
-4. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
-5. Create the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
-6. Build maintenance report generation, followed by ESP32 sensor hardware integration.
+1. Commit the anomaly detection module and simulator ramp fix once approved.
+2. Build the diagnosis module mapping detected anomalies to probable root causes with supporting sensor evidence.
+3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
+4. Create the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
+5. Build maintenance report generation, followed by ESP32 sensor hardware integration.
 
 ## 10. Update Rule
 
