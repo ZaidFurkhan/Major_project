@@ -78,6 +78,9 @@ function buildReading(rng, machineId, scenario, timestamp, step) {
     },
   };
 
+  // Ramp starts after step 9 (baseline) and reaches full anomaly magnitude by step 40
+  const ramp = Math.max(0, Math.min(1, (step - 10) / 30));
+
   switch (scenario) {
     case 'normal':
       // All channels near baseline – already set above
@@ -85,23 +88,21 @@ function buildReading(rng, machineId, scenario, timestamp, step) {
 
     case 'vibration_anomaly': {
       // Vibration gradually rises; other channels stay near baseline
-      const ramp = Math.min(1, step / 30);
       base.vibrationRmsG =
         T.baselineVibrationRmsG + ramp * (T.anomalyVibrationRmsG - T.baselineVibrationRmsG) + noise(rng, 0.05);
       break;
     }
 
     case 'overheating': {
-      // Temperature rises over successive readings, capped at contract max
-      const risePerStep = T.overheatRiseRateC;
-      const temp = T.baselineTemperatureC + step * risePerStep + noise(rng, 0.1);
-      base.temperatureC = Math.min(temp, 150);
+      // Temperature rises gradually to overheat cap; noise drawn to preserve RNG sequence
+      noise(rng, 0.1);
+      base.temperatureC =
+        T.baselineTemperatureC + ramp * (T.overheatTemperatureC - T.baselineTemperatureC);
       break;
     }
 
     case 'abnormal_load': {
       // Current gradually rises, rpm gradually falls; temperature slightly elevated
-      const ramp = Math.min(1, step / 30);
       base.currentA = T.baselineCurrentA + ramp * (T.abnormalLoadCurrentA - T.baselineCurrentA) + noise(rng, 0.2);
       base.rpm = T.commandedRpm - ramp * (T.commandedRpm - T.abnormalLoadRpm) + noise(rng, 10);
       base.temperatureC = T.baselineTemperatureC + ramp * 3 + noise(rng, 1);
@@ -110,7 +111,6 @@ function buildReading(rng, machineId, scenario, timestamp, step) {
 
     case 'rpm_anomaly': {
       // RPM gradually deviates from commandedRpm
-      const ramp = Math.min(1, step / 30);
       base.rpm = T.commandedRpm + ramp * T.rpmAnomalyOffset + noise(rng, 15);
       break;
     }
