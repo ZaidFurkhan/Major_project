@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 14, 2026, the repository contains 26 commits on main, 104 passing backend tests across 15 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, and approved repair procedure storage and lookup is implemented, while AI service integrations, repair verification workflows, and mobile interfaces remain in early scaffolding.
+As of October 14, 2026, the repository contains 29 commits on main, 113 passing backend tests across 16 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, and post-repair verification decision logic is implemented, while AI service integrations, report generation, and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -38,19 +38,16 @@ As of October 14, 2026, the repository contains 26 commits on main, 104 passing 
 | 2026-10-12 | 3105dbb | Update progress document with live delivery and anomaly detection (pushed to origin/main) |
 | 2026-10-12 | ea0066c | Add candidate-cause diagnosis from detected signatures |
 | 2026-10-12 | f8980b5 | Update progress document with anomaly detection and diagnosis |
+| 2026-10-14 | 4871354 | Add approved repair procedure storage with source references |
+| 2026-10-14 | 7766ef5 | Add repair guide lookup that returns only approved steps |
+| 2026-10-14 | e17038e | Update progress document with repair guide backend |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The approved repair procedure storage and lookup feature is implemented in the local working tree and planned for commit. It adds 16 tests, raising the backend test total from 88 to 104 across 15 suites:
+The repair verification decision module is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 104 to 113 across 16 suites:
 
-- database/migrations/0003_approved_procedures.sql: SQL migration adding repair_procedures and repair_steps tables with constraints (uncommitted).
-- backend/src/db/repairProcedures.js: Database repository functions for creating, approving, and querying repair procedures and steps (uncommitted).
-- backend/src/repair/guide.js: Domain module providing validated repair guide lookups for allowed fault signatures (uncommitted).
-- backend/src/api/repairGuide.routes.js: Express router exposing the approved repair guide GET endpoint (uncommitted).
-- backend/src/app.js: Mounts the repair guide router in the application when a database pool is provided (uncommitted).
-- backend/test/repair/repairProcedures.test.js: Unit tests for repair procedure repository operations, constraints, and cascading deletes (8 tests, uncommitted).
-- backend/test/repair/guide.test.js: Unit tests for repair guide domain lookup rules and fixture retrieval (4 tests, uncommitted).
-- backend/test/api/repairGuideRoutes.test.js: Integration tests for the repair guide REST endpoint and health check (4 tests, uncommitted).
+- backend/src/verification/verifyRepair.js: pure decision function evaluating post-repair readings against baseline using anomaly detection rules (uncommitted).
+- backend/test/verification/verifyRepair.test.js: unit tests for repair verification decisions, error handling, determinism, and uncertainty (9 tests, uncommitted).
 
 ## 5. Architecture as Built
 
@@ -63,6 +60,7 @@ The approved repair procedure storage and lookup feature is implemented in the l
 - Anomaly detection: built. Deterministic window analysis evaluating measurement evidence against threshold rules.
 - Diagnosis: built (candidate rules implemented; no AI service, no RAG).
 - Repair guide: backend data model and lookup built; no mobile screen, no speech output.
+- Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 
 ## 6. Decisions Made
 
@@ -75,10 +73,12 @@ The approved repair procedure storage and lookup feature is implemented in the l
 - Anomaly detection runs in the Node backend as a pure module for now, and it may move to the AI service later behind the same function contract: keeps the first analysis step testable without a second service.
 - Diagnosis uses fixed candidate rules, not a language model, and presents every candidate as a possibility with a check to run: the system must not claim certainty it does not have.
 - The repair guide returns only approved, source-referenced steps and never generates instructions, because unverified repair steps are unsafe.
+- Repair verification uses the baseline and the same detection rules, so PASS means no fault signature relative to the reference, not proof of repair.
 
 ## 7. Known Issues
 
 - The repair procedures table is empty until a human approves real procedures from source documents.
+- MIN_BASELINE_READINGS and MIN_POST_REPAIR_READINGS are placeholder values until calibration.
 - The anomaly detector's default 20-reading window reaches only part of full fault magnitude on the simulator, so detection margins are thin; and simulated data cannot support real machine decisions.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
@@ -108,10 +108,10 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the approved repair procedure storage and lookup once approved.
-2. Build the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
+1. Commit the repair verification decision module once approved.
+2. Build maintenance report generation or verification storage, as the owner decides.
 3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
-4. Build maintenance report generation, followed by ESP32 sensor hardware integration.
+4. ESP32 sensor hardware integration.
 
 ## 10. Update Rule
 
