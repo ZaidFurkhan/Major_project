@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 14, 2026, the repository contains 29 commits on main, 113 passing backend tests across 16 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, and post-repair verification decision logic is implemented, while AI service integrations, report generation, and mobile interfaces remain in early scaffolding.
+As of October 14, 2026, the repository contains 31 commits on main, 122 passing backend tests across 17 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, and verification result persistence against service cases is implemented, while AI service integrations, report generation, and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -41,19 +41,22 @@ As of October 14, 2026, the repository contains 29 commits on main, 113 passing 
 | 2026-10-14 | 4871354 | Add approved repair procedure storage with source references |
 | 2026-10-14 | 7766ef5 | Add repair guide lookup that returns only approved steps |
 | 2026-10-14 | e17038e | Update progress document with repair guide backend |
+| 2026-10-14 | 1d13335 | Add baseline-based repair verification decision |
+| 2026-10-14 | c7f8fca | Update progress document with repair verification |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The repair verification decision module is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 104 to 113 across 16 suites:
+The verification results persistence feature is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 113 to 122 across 17 suites:
 
-- backend/src/verification/verifyRepair.js: pure decision function evaluating post-repair readings against baseline using anomaly detection rules (uncommitted).
-- backend/test/verification/verifyRepair.test.js: unit tests for repair verification decisions, error handling, determinism, and uncertainty (9 tests, uncommitted).
+- database/migrations/0004_verification_results.sql: SQL migration creating the verification_results table with service case foreign key and check constraints (uncommitted).
+- backend/src/db/verificationResults.js: Database repository functions for inserting and listing verification results for service cases (uncommitted).
+- backend/test/verification/verificationResults.test.js: Unit tests for verification result persistence, constraints, cascading deletes, and case status immutability (9 tests, uncommitted).
 
 ## 5. Architecture as Built
 
 - Backend (Node.js/Express): built.
 - AI service (Python/FastAPI): partial. Only health and 404 endpoints are implemented.
-- PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, and repair steps tables with indexes.
+- PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, repair steps, and verification results tables with indexes.
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
 - WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
 - Simulator: built. Generates seeded deterministic readings for normal operation and four anomaly scenarios.
@@ -61,6 +64,7 @@ The repair verification decision module is implemented in the local working tree
 - Diagnosis: built (candidate rules implemented; no AI service, no RAG).
 - Repair guide: backend data model and lookup built; no mobile screen, no speech output.
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
+- Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 
 ## 6. Decisions Made
 
@@ -74,6 +78,7 @@ The repair verification decision module is implemented in the local working tree
 - Diagnosis uses fixed candidate rules, not a language model, and presents every candidate as a possibility with a check to run: the system must not claim certainty it does not have.
 - The repair guide returns only approved, source-referenced steps and never generates instructions, because unverified repair steps are unsafe.
 - Repair verification uses the baseline and the same detection rules, so PASS means no fault signature relative to the reference, not proof of repair.
+- Verification results are stored as records and do not close a case; closing is a separate decision by a person.
 
 ## 7. Known Issues
 
@@ -108,8 +113,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the repair verification decision module once approved.
-2. Build maintenance report generation or verification storage, as the owner decides.
+1. Commit the verification results storage once approved.
+2. Build maintenance report generation from service cases, diagnosis, and verification records.
 3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
 4. ESP32 sensor hardware integration.
 
