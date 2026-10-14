@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 14, 2026, the repository contains 31 commits on main, 122 passing backend tests across 17 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, and verification result persistence against service cases is implemented, while AI service integrations, report generation, and mobile interfaces remain in early scaffolding.
+As of October 14, 2026, the repository contains 33 commits on main, 136 passing backend tests across 19 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, and service case reporting is implemented, while AI service integrations, diagnosis persistence, and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -43,14 +43,19 @@ As of October 14, 2026, the repository contains 31 commits on main, 122 passing 
 | 2026-10-14 | e17038e | Update progress document with repair guide backend |
 | 2026-10-14 | 1d13335 | Add baseline-based repair verification decision |
 | 2026-10-14 | c7f8fca | Update progress document with repair verification |
+| 2026-10-14 | bff3f90 | Add stored verification results for service cases |
+| 2026-10-14 | 5e3fd51 | Update progress document with verification storage |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The verification results persistence feature is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 113 to 122 across 17 suites:
+The case report builder and endpoints feature is implemented in the local working tree and planned for commit. It adds 14 tests, raising the backend test total from 122 to 136 across 19 suites:
 
-- database/migrations/0004_verification_results.sql: SQL migration creating the verification_results table with service case foreign key and check constraints (uncommitted).
-- backend/src/db/verificationResults.js: Database repository functions for inserting and listing verification results for service cases (uncommitted).
-- backend/test/verification/verificationResults.test.js: Unit tests for verification result persistence, constraints, cascading deletes, and case status immutability (9 tests, uncommitted).
+- backend/src/report/buildCaseReport.js: pure function building structured case reports and text renderings from case and verification records (uncommitted).
+- backend/src/db/caseReport.js: repository reader loading machine, service case, and verification records for a case (uncommitted).
+- backend/src/api/caseReport.routes.js: Express router exposing GET /api/cases/:id/report with JSON and plain-text formats (uncommitted).
+- backend/src/app.js: mounts caseReportRoutes in the application when a database pool is provided (uncommitted).
+- backend/test/report/buildCaseReport.test.js: unit tests for case report building, repair outcome determination, notes, and text rendering (9 tests, uncommitted).
+- backend/test/api/caseReportRoutes.test.js: integration tests for case report REST endpoints, validation, text formatting, and health check (5 tests, uncommitted).
 
 ## 5. Architecture as Built
 
@@ -65,6 +70,7 @@ The verification results persistence feature is implemented in the local working
 - Repair guide: backend data model and lookup built; no mobile screen, no speech output.
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
+- Case report: JSON and text report from stored case and verification records; no diagnosis storage; no email, no photos, no mobile screen.
 
 ## 6. Decisions Made
 
@@ -79,10 +85,12 @@ The verification results persistence feature is implemented in the local working
 - The repair guide returns only approved, source-referenced steps and never generates instructions, because unverified repair steps are unsafe.
 - Repair verification uses the baseline and the same detection rules, so PASS means no fault signature relative to the reference, not proof of repair.
 - Verification results are stored as records and do not close a case; closing is a separate decision by a person.
+- A report claims a repair is verified only when the latest stored verification is PASS.
 
 ## 7. Known Issues
 
 - The repair procedures table is empty until a human approves real procedures from source documents.
+- Diagnosis is not stored, so reports cannot include the diagnosis yet.
 - MIN_BASELINE_READINGS and MIN_POST_REPAIR_READINGS are placeholder values until calibration.
 - The anomaly detector's default 20-reading window reaches only part of full fault magnitude on the simulator, so detection margins are thin; and simulated data cannot support real machine decisions.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
@@ -113,8 +121,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the verification results storage once approved.
-2. Build maintenance report generation from service cases, diagnosis, and verification records.
+1. Commit the case report builder and endpoints once approved.
+2. Build diagnosis record storage or mobile application development, as the owner decides.
 3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
 4. ESP32 sensor hardware integration.
 
