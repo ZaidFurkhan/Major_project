@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 14, 2026, the repository contains 33 commits on main, 136 passing backend tests across 19 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, and service case reporting is implemented, while AI service integrations, diagnosis persistence, and mobile interfaces remain in early scaffolding.
+As of October 14, 2026, the repository contains 35 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -45,32 +45,35 @@ As of October 14, 2026, the repository contains 33 commits on main, 136 passing 
 | 2026-10-14 | c7f8fca | Update progress document with repair verification |
 | 2026-10-14 | bff3f90 | Add stored verification results for service cases |
 | 2026-10-14 | 5e3fd51 | Update progress document with verification storage |
+| 2026-10-14 | b7a34f5 | Add case report builder with verified-only repair outcome |
+| 2026-10-14 | da5d6f4 | Update progress document with case report |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The case report builder and endpoints feature is implemented in the local working tree and planned for commit. It adds 14 tests, raising the backend test total from 122 to 136 across 19 suites:
+The diagnosis persistence against service cases and report integration feature is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 136 to 145 across 20 suites:
 
-- backend/src/report/buildCaseReport.js: pure function building structured case reports and text renderings from case and verification records (uncommitted).
-- backend/src/db/caseReport.js: repository reader loading machine, service case, and verification records for a case (uncommitted).
-- backend/src/api/caseReport.routes.js: Express router exposing GET /api/cases/:id/report with JSON and plain-text formats (uncommitted).
-- backend/src/app.js: mounts caseReportRoutes in the application when a database pool is provided (uncommitted).
-- backend/test/report/buildCaseReport.test.js: unit tests for case report building, repair outcome determination, notes, and text rendering (9 tests, uncommitted).
-- backend/test/api/caseReportRoutes.test.js: integration tests for case report REST endpoints, validation, text formatting, and health check (5 tests, uncommitted).
+- database/migrations/0005_diagnoses.sql: migration creating diagnoses table with cascade delete on service cases and index on service_case_id, created_at, id (uncommitted).
+- backend/src/db/diagnoses.js: repository module for inserting and listing diagnosis records against service cases (uncommitted).
+- backend/src/report/buildCaseReport.js: updated to include diagnoses and latestDiagnosis and revised diagnosis note (uncommitted).
+- backend/src/db/caseReport.js: updated to load diagnoses via listDiagnosesForCase alongside verification records (uncommitted).
+- backend/test/diagnosis/diagnosisRecords.test.js: unit and integration tests for diagnosis persistence, validation, cascading deletes, and case status immutability (8 tests, uncommitted).
+- backend/test/report/buildCaseReport.test.js: updated expectations for diagnosis note and added test for latestDiagnosis (10 tests, uncommitted).
 
 ## 5. Architecture as Built
 
 - Backend (Node.js/Express): built.
 - AI service (Python/FastAPI): partial. Only health and 404 endpoints are implemented.
-- PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, repair steps, and verification results tables with indexes.
+- PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, repair steps, verification results, and diagnoses tables with indexes.
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
 - WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
 - Simulator: built. Generates seeded deterministic readings for normal operation and four anomaly scenarios.
 - Anomaly detection: built. Deterministic window analysis evaluating measurement evidence against threshold rules.
 - Diagnosis: built (candidate rules implemented; no AI service, no RAG).
+- Diagnosis storage: diagnoses stored as possible causes against service cases; case status not changed; included in case reports.
 - Repair guide: backend data model and lookup built; no mobile screen, no speech output.
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
-- Case report: JSON and text report from stored case and verification records; no diagnosis storage; no email, no photos, no mobile screen.
+- Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
 
 ## 6. Decisions Made
 
@@ -82,6 +85,7 @@ The case report builder and endpoints feature is implemented in the local workin
 - Single-branch trunk workflow: development proceeds directly on main with focused commits, avoiding merge overhead.
 - Anomaly detection runs in the Node backend as a pure module for now, and it may move to the AI service later behind the same function contract: keeps the first analysis step testable without a second service.
 - Diagnosis uses fixed candidate rules, not a language model, and presents every candidate as a possibility with a check to run: the system must not claim certainty it does not have.
+- Stored diagnoses are candidate causes with checks, never confirmed causes.
 - The repair guide returns only approved, source-referenced steps and never generates instructions, because unverified repair steps are unsafe.
 - Repair verification uses the baseline and the same detection rules, so PASS means no fault signature relative to the reference, not proof of repair.
 - Verification results are stored as records and do not close a case; closing is a separate decision by a person.
@@ -90,7 +94,7 @@ The case report builder and endpoints feature is implemented in the local workin
 ## 7. Known Issues
 
 - The repair procedures table is empty until a human approves real procedures from source documents.
-- Diagnosis is not stored, so reports cannot include the diagnosis yet.
+- The diagnosis note in the case report reflects storage of possible causes with checks rather than non-storage.
 - MIN_BASELINE_READINGS and MIN_POST_REPAIR_READINGS are placeholder values until calibration.
 - The anomaly detector's default 20-reading window reaches only part of full fault magnitude on the simulator, so detection margins are thin; and simulated data cannot support real machine decisions.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
@@ -121,10 +125,9 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the case report builder and endpoints once approved.
-2. Build diagnosis record storage or mobile application development, as the owner decides.
-3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
-4. ESP32 sensor hardware integration.
+1. Commit diagnosis storage against service cases once approved.
+2. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views, as the owner decides.
+3. ESP32 sensor hardware integration.
 
 ## 10. Update Rule
 
