@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 12, 2026, the repository contains 24 commits on main, 88 passing backend tests across 12 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, and candidate-cause diagnosis is implemented, while AI service integrations, repair workflows, and mobile interfaces remain in early scaffolding.
+As of October 14, 2026, the repository contains 26 commits on main, 104 passing backend tests across 15 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, and approved repair procedure storage and lookup is implemented, while AI service integrations, repair verification workflows, and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -36,25 +36,33 @@ As of October 12, 2026, the repository contains 24 commits on main, 88 passing b
 | 2026-10-12 | d403332 | Keep simulator baseline window free of fault ramp (pushed to origin/main) |
 | 2026-10-12 | a522b7a | Add explainable anomaly detector for telemetry windows (pushed to origin/main) |
 | 2026-10-12 | 3105dbb | Update progress document with live delivery and anomaly detection (pushed to origin/main) |
+| 2026-10-12 | ea0066c | Add candidate-cause diagnosis from detected signatures |
+| 2026-10-12 | f8980b5 | Update progress document with anomaly detection and diagnosis |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The candidate-cause diagnosis module is implemented in the local working tree and planned for commit. It adds 13 tests, raising the backend test total from 75 to 88:
+The approved repair procedure storage and lookup feature is implemented in the local working tree and planned for commit. It adds 16 tests, raising the backend test total from 88 to 104 across 15 suites:
 
-- backend/src/diagnosis/candidateRules.js: candidate cause definitions and contradiction rules mapped from telemetry signatures.
-- backend/src/diagnosis/diagnose.js: deterministic candidate-cause diagnosis evaluating anomalies, supporting evidence, contradictions, and uncertainty.
-- backend/test/diagnosis/diagnose.test.js: unit tests for candidate diagnosis across scenarios, contradictions, ordering, and data sources (13 tests).
+- database/migrations/0003_approved_procedures.sql: SQL migration adding repair_procedures and repair_steps tables with constraints (uncommitted).
+- backend/src/db/repairProcedures.js: Database repository functions for creating, approving, and querying repair procedures and steps (uncommitted).
+- backend/src/repair/guide.js: Domain module providing validated repair guide lookups for allowed fault signatures (uncommitted).
+- backend/src/api/repairGuide.routes.js: Express router exposing the approved repair guide GET endpoint (uncommitted).
+- backend/src/app.js: Mounts the repair guide router in the application when a database pool is provided (uncommitted).
+- backend/test/repair/repairProcedures.test.js: Unit tests for repair procedure repository operations, constraints, and cascading deletes (8 tests, uncommitted).
+- backend/test/repair/guide.test.js: Unit tests for repair guide domain lookup rules and fixture retrieval (4 tests, uncommitted).
+- backend/test/api/repairGuideRoutes.test.js: Integration tests for the repair guide REST endpoint and health check (4 tests, uncommitted).
 
 ## 5. Architecture as Built
 
 - Backend (Node.js/Express): built.
 - AI service (Python/FastAPI): partial. Only health and 404 endpoints are implemented.
-- PostgreSQL schema: built. Machines, service cases, and telemetry readings tables with indexes.
+- PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, and repair steps tables with indexes.
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
 - WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
 - Simulator: built. Generates seeded deterministic readings for normal operation and four anomaly scenarios.
 - Anomaly detection: built. Deterministic window analysis evaluating measurement evidence against threshold rules.
-- Diagnosis: partial (candidate rules implemented; no AI service, no RAG, no repair guidance).
+- Diagnosis: built (candidate rules implemented; no AI service, no RAG).
+- Repair guide: backend data model and lookup built; no mobile screen, no speech output.
 
 ## 6. Decisions Made
 
@@ -66,9 +74,11 @@ The candidate-cause diagnosis module is implemented in the local working tree an
 - Single-branch trunk workflow: development proceeds directly on main with focused commits, avoiding merge overhead.
 - Anomaly detection runs in the Node backend as a pure module for now, and it may move to the AI service later behind the same function contract: keeps the first analysis step testable without a second service.
 - Diagnosis uses fixed candidate rules, not a language model, and presents every candidate as a possibility with a check to run: the system must not claim certainty it does not have.
+- The repair guide returns only approved, source-referenced steps and never generates instructions, because unverified repair steps are unsafe.
 
 ## 7. Known Issues
 
+- The repair procedures table is empty until a human approves real procedures from source documents.
 - The anomaly detector's default 20-reading window reaches only part of full fault magnitude on the simulator, so detection margins are thin; and simulated data cannot support real machine decisions.
 - embedded-postgres is pinned to beta version 18.4.0-beta.17. Stability should be rechecked before the final demonstration.
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
@@ -98,11 +108,10 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit the diagnosis module once approved.
-2. Build the Repair Guide data model and its screen as the next item.
+1. Commit the approved repair procedure storage and lookup once approved.
+2. Build the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
 3. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views.
-4. Create the repair verification logic evaluating post-repair telemetry to return PASS, FAIL, or INCONCLUSIVE.
-5. Build maintenance report generation, followed by ESP32 sensor hardware integration.
+4. Build maintenance report generation, followed by ESP32 sensor hardware integration.
 
 ## 10. Update Rule
 
