@@ -1,5 +1,6 @@
 import express from 'express';
 import { telemetryRoutes } from './api/telemetry.routes.js';
+import { repairGuideRoutes } from './api/repairGuide.routes.js';
 
 export function createApp(options = {}) {
   const app = express();
@@ -10,6 +11,7 @@ export function createApp(options = {}) {
 
   if (options && options.pool) {
     app.use(telemetryRoutes({ pool: options.pool }));
+    app.use(repairGuideRoutes({ pool: options.pool }));
   }
 
   return app;
