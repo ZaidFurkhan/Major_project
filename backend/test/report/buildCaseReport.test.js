@@ -140,7 +140,7 @@ describe('buildCaseReport builder', () => {
 
     assert.ok(
       report.notes.includes(
-        'Diagnosis records are not stored in this version of the system.'
+        'Diagnoses are stored as possible causes with checks to run, not as confirmed causes.'
       )
     );
     assert.ok(
@@ -153,6 +153,39 @@ describe('buildCaseReport builder', () => {
         'Simulated readings must not be used for a real machine decision.'
       )
     );
+  });
+
+  it('latestDiagnosis is the last diagnosis passed in', () => {
+    const diagnoses = [
+      {
+        createdAt: new Date('2026-01-01T01:00:00.000Z'),
+        status: 'inconclusive',
+        signatures: [],
+        candidates: [],
+        dataSources: ['simulated'],
+        uncertainty: 'TEST FIXTURE: uncertainty',
+      },
+      {
+        createdAt: new Date('2026-01-01T02:00:00.000Z'),
+        status: 'diagnosed',
+        signatures: ['vibration_elevated'],
+        candidates: [{ id: 'unbalance', label: 'Unbalance' }],
+        dataSources: ['simulated'],
+        uncertainty: 'TEST FIXTURE: uncertainty',
+      },
+    ];
+
+    const report = buildCaseReport({
+      machine: baseMachine,
+      serviceCase: baseCase,
+      verificationResults: [],
+      diagnoses,
+    });
+
+    assert.equal(report.diagnoses.length, 2);
+    assert.ok(report.latestDiagnosis);
+    assert.equal(report.latestDiagnosis.status, 'diagnosed');
+    assert.deepEqual(report.latestDiagnosis.signatures, ['vibration_elevated']);
   });
 
   it('a closed case with no PASS includes the extra closed-without-PASS note', () => {

@@ -1,7 +1,26 @@
-export function buildCaseReport({ machine, serviceCase, verificationResults } = {}) {
+export function buildCaseReport({
+  machine,
+  serviceCase,
+  verificationResults,
+  diagnoses,
+} = {}) {
   if (!machine || !serviceCase) {
     return { status: 'not_found' };
   }
+
+  const formattedDiagnoses = (diagnoses || []).map((d) => ({
+    createdAt: d.createdAt,
+    status: d.status,
+    signatures: d.signatures,
+    candidates: d.candidates,
+    dataSources: d.dataSources,
+    uncertainty: d.uncertainty,
+  }));
+
+  const latestDiagnosis =
+    formattedDiagnoses.length > 0
+      ? formattedDiagnoses[formattedDiagnoses.length - 1]
+      : null;
 
   const verifications = (verificationResults || []).map((v) => ({
     createdAt: v.createdAt,
@@ -25,7 +44,7 @@ export function buildCaseReport({ machine, serviceCase, verificationResults } = 
   }
 
   const notes = [
-    'Diagnosis records are not stored in this version of the system.',
+    'Diagnoses are stored as possible causes with checks to run, not as confirmed causes.',
     'Verification compares post-repair readings with the supplied baseline only and does not prove the cause was repaired.',
     'Simulated readings must not be used for a real machine decision.',
   ];
@@ -49,6 +68,8 @@ export function buildCaseReport({ machine, serviceCase, verificationResults } = 
       type: machine.type,
       location: machine.location,
     },
+    diagnoses: formattedDiagnoses,
+    latestDiagnosis,
     verifications,
     latestVerification,
     repairOutcome,
