@@ -2,4 +2,4 @@
 
 React Native (JavaScript) application.
 
-Status: not yet implemented.
+Status: connection check screen only.

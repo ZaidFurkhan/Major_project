@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 14, 2026, the repository contains 35 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 15, 2026, the repository contains 38 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -47,17 +47,32 @@ As of October 14, 2026, the repository contains 35 commits on main, 145 passing 
 | 2026-10-14 | 5e3fd51 | Update progress document with verification storage |
 | 2026-10-14 | b7a34f5 | Add case report builder with verified-only repair outcome |
 | 2026-10-14 | da5d6f4 | Update progress document with case report |
+| 2026-10-14 | 73bac16 | Add stored diagnosis records for service cases |
+| 2026-10-14 | a20db03 | Include stored diagnoses in case reports |
+| 2026-10-14 | 6bdd25d | Update progress document with diagnosis storage |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The diagnosis persistence against service cases and report integration feature is implemented in the local working tree and planned for commit. It adds 9 tests, raising the backend test total from 136 to 145 across 20 suites:
+The mobile application skeleton with backend connection health check is implemented in the local working tree and planned for commit:
 
-- database/migrations/0005_diagnoses.sql: migration creating diagnoses table with cascade delete on service cases and index on service_case_id, created_at, id (uncommitted).
-- backend/src/db/diagnoses.js: repository module for inserting and listing diagnosis records against service cases (uncommitted).
-- backend/src/report/buildCaseReport.js: updated to include diagnoses and latestDiagnosis and revised diagnosis note (uncommitted).
-- backend/src/db/caseReport.js: updated to load diagnoses via listDiagnosesForCase alongside verification records (uncommitted).
-- backend/test/diagnosis/diagnosisRecords.test.js: unit and integration tests for diagnosis persistence, validation, cascading deletes, and case status immutability (8 tests, uncommitted).
-- backend/test/report/buildCaseReport.test.js: updated expectations for diagnosis note and added test for latestDiagnosis (10 tests, uncommitted).
+- mobile/package.json: application manifest and dependencies for Expo and React Native (uncommitted).
+- mobile/package-lock.json: lockfile for mobile dependencies (uncommitted).
+- mobile/app.json: Expo configuration for application metadata and icons (uncommitted).
+- mobile/index.js: application entry point registering the root component (uncommitted).
+- mobile/App.js: root component rendering ConnectionCheckScreen (uncommitted).
+- mobile/src/config.js: configurable backend base URL pointing to the development PC (uncommitted).
+- mobile/src/services/api.js: API client with fetchHealth and timeout controller (uncommitted).
+- mobile/src/screens/ConnectionCheckScreen.js: health check screen showing loading, connected, and error states with retry (uncommitted).
+- mobile/.gitignore: git ignore rules for mobile dependencies and build artifacts (uncommitted).
+- mobile/AGENTS.md: guidelines for Expo project maintenance (uncommitted).
+- mobile/LICENSE: license file from the Expo template (uncommitted).
+- mobile/assets/icon.png: application icon image (uncommitted).
+- mobile/assets/splash-icon.png: splash screen icon image (uncommitted).
+- mobile/assets/favicon.png: web favicon image (uncommitted).
+- mobile/assets/android-icon-foreground.png: Android adaptive icon foreground layer (uncommitted).
+- mobile/assets/android-icon-background.png: Android adaptive icon background layer (uncommitted).
+- mobile/assets/android-icon-monochrome.png: Android adaptive icon monochrome layer (uncommitted).
+- mobile/README.md: status line updated to connection check screen only (uncommitted).
 
 ## 5. Architecture as Built
 
@@ -74,6 +89,7 @@ The diagnosis persistence against service cases and report integration feature i
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 - Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
+- Mobile (React Native/Expo): connection check screen built in Expo; no MechSense screens yet.
 
 ## 6. Decisions Made
 
@@ -90,6 +106,7 @@ The diagnosis persistence against service cases and report integration feature i
 - Repair verification uses the baseline and the same detection rules, so PASS means no fault signature relative to the reference, not proof of repair.
 - Verification results are stored as records and do not close a case; closing is a separate decision by a person.
 - A report claims a repair is verified only when the latest stored verification is PASS.
+- Expo managed workflow was chosen for Windows setup speed and Expo Go testing on Android.
 
 ## 7. Known Issues
 
@@ -101,7 +118,8 @@ The diagnosis persistence against service cases and report integration feature i
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
 - pgvector is not available in the embedded PostgreSQL package, requiring an alternative environment or service for vector embeddings during RAG implementation.
 - The httpx library produces a deprecation warning in pytest with FastAPI testclient. It does not cause test failure.
-- No hardware, firmware, or mobile client code is implemented yet.
+- The backend URL in mobile/src/config.js must be set to the PC's current Wi-Fi address (currently 192.168.0.9), and that Windows Firewall may block port 3000.
+- No hardware or firmware code is implemented yet; mobile client is currently connection check skeleton only.
 
 ## 8. How to Run and Test
 
@@ -125,9 +143,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Commit diagnosis storage against service cases once approved.
-2. Develop the mobile application starting with the Live Monitor screen, followed by Diagnosis, Repair Guide, and Verification views, as the owner decides.
-3. ESP32 sensor hardware integration.
+1. Move the mobile skeleton to done once committed; next is the Live Monitor screen.
+2. ESP32 sensor hardware integration.
 
 ## 10. Update Rule
 
