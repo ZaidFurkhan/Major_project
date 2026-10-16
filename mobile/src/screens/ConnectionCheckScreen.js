@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   Button,
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchHealth } from '../services/api';
 
 export default function ConnectionCheckScreen() {
