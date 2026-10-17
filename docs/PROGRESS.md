@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 16, 2026, the repository contains 39 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 17, 2026, the repository contains 41 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -53,6 +53,9 @@ As of October 16, 2026, the repository contains 39 commits on main, 145 passing 
 
 ## 4. Work in Progress (Not Yet Committed)
 
+- backend/scripts/dev-stack.js: development script starting persistent PostgreSQL, in-process Aedes MQTT broker, and simulated telemetry publisher (uncommitted).
+- backend/package.json: added dev:stack script entry pointing to scripts/dev-stack.js (uncommitted).
+
 The mobile application skeleton with backend connection health check is implemented in the local working tree and planned for commit:
 
 - mobile/package.json: application manifest and dependencies for Expo and React Native (uncommitted).
@@ -90,6 +93,7 @@ The mobile application skeleton with backend connection health check is implemen
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 - Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
 - Mobile (React Native/Expo): connection check screen built in Expo; no MechSense screens yet.
+- Local development stack: persistent PostgreSQL, MQTT broker, and simulated publisher started by one script; not a production deployment.
 
 ## 6. Decisions Made
 
@@ -120,6 +124,7 @@ The mobile application skeleton with backend connection health check is implemen
 - The httpx library produces a deprecation warning in pytest with FastAPI testclient. It does not cause test failure.
 - The backend URL in mobile/src/config.js must be set to the PC's current Wi-Fi address (currently 192.168.0.9), and that Windows Firewall may block port 3000.
 - No hardware or firmware code is implemented yet; mobile client is currently connection check skeleton only.
+- The dev stack needs MECHSENSE_DEV_DB_PASSWORD to be set each session, and that the dev database uses simulated data only.
 
 ## 8. How to Run and Test
 
