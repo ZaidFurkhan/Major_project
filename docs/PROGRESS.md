@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 17, 2026, the repository contains 41 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 18, 2026, the repository contains 42 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -53,29 +53,12 @@ As of October 17, 2026, the repository contains 41 commits on main, 145 passing 
 
 ## 4. Work in Progress (Not Yet Committed)
 
-- backend/scripts/dev-stack.js: development script starting persistent PostgreSQL, in-process Aedes MQTT broker, and simulated telemetry publisher (uncommitted).
-- backend/package.json: added dev:stack script entry pointing to scripts/dev-stack.js (uncommitted).
+The Live Monitor screen and supporting mobile telemetry polling client are implemented in the local working tree:
 
-The mobile application skeleton with backend connection health check is implemented in the local working tree and planned for commit:
-
-- mobile/package.json: application manifest and dependencies for Expo and React Native (uncommitted).
-- mobile/package-lock.json: lockfile for mobile dependencies (uncommitted).
-- mobile/app.json: Expo configuration for application metadata and icons (uncommitted).
-- mobile/index.js: application entry point registering the root component (uncommitted).
-- mobile/App.js: root component rendering ConnectionCheckScreen (uncommitted).
-- mobile/src/config.js: configurable backend base URL pointing to the development PC (uncommitted).
-- mobile/src/services/api.js: API client with fetchHealth and timeout controller (uncommitted).
-- mobile/src/screens/ConnectionCheckScreen.js: health check screen showing loading, connected, and error states with retry (uncommitted).
-- mobile/.gitignore: git ignore rules for mobile dependencies and build artifacts (uncommitted).
-- mobile/AGENTS.md: guidelines for Expo project maintenance (uncommitted).
-- mobile/LICENSE: license file from the Expo template (uncommitted).
-- mobile/assets/icon.png: application icon image (uncommitted).
-- mobile/assets/splash-icon.png: splash screen icon image (uncommitted).
-- mobile/assets/favicon.png: web favicon image (uncommitted).
-- mobile/assets/android-icon-foreground.png: Android adaptive icon foreground layer (uncommitted).
-- mobile/assets/android-icon-background.png: Android adaptive icon background layer (uncommitted).
-- mobile/assets/android-icon-monochrome.png: Android adaptive icon monochrome layer (uncommitted).
-- mobile/README.md: status line updated to connection check screen only (uncommitted).
+- mobile/src/monitorSettings.js: machine identifier and polling interval configuration constants (uncommitted).
+- mobile/src/theme.js: muted dark color palette and layout spacing constants (uncommitted).
+- mobile/src/services/api.js: telemetry endpoint client with fetchLatestTelemetry, timeout, and abort handling (uncommitted).
+- mobile/src/screens/LiveMonitorScreen.js: live telemetry monitor screen with 2x2 metric cards and stale state display (uncommitted).
 
 ## 5. Architecture as Built
 
@@ -92,7 +75,7 @@ The mobile application skeleton with backend connection health check is implemen
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 - Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
-- Mobile (React Native/Expo): connection check screen built in Expo; no MechSense screens yet.
+- Mobile (React Native/Expo): Live Monitor polls latest telemetry every 2 seconds; muted dark palette; warning colour reserved for anomalies; no diagnosis on phone.
 - Local development stack: persistent PostgreSQL, MQTT broker, and simulated publisher started by one script; not a production deployment.
 
 ## 6. Decisions Made
@@ -148,8 +131,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Live Monitor screen.
-2. ESP32 sensor hardware integration.
+1. Welcome screen integration.
+2. Diagnosis view.
 
 ## 10. Update Rule
 
