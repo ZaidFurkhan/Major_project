@@ -1,21 +1,38 @@
 # MechSense
 
-AI-assisted predictive-maintenance and fault diagnosis for a motor test rig. Monitors temperature, vibration, current, and RPM; detects abnormal behavior; supports diagnosis, guided repair, and verification.
+MechSense is an AI-assisted predictive maintenance system for an industrial motor test rig. It monitors motor sensor readings, detects known fault patterns, suggests possible causes with checks to run, guides the repair using approved procedures only, verifies the result with new measurements, and records each case.
 
-## Repository layout
-- mobile/: React Native (JavaScript) application
-- backend/: Node.js and Express API, MQTT ingestion, WebSocket broadcast
-- ai-service/: Python and FastAPI for sensor analysis, diagnosis, vision, and RAG
-- firmware/: ESP32 sensor firmware
-- database/: PostgreSQL schema and migrations
-- docs/: project documentation
+## Status
 
-Status: see the Current status section below.
+The project is in active development.
 
-## Current status
-The project is in active development and not yet runnable as a complete system.
-Backend capabilities: health endpoint, PostgreSQL schema and migrations, MQTT telemetry ingestion, WebSocket live delivery, and latest-reading REST endpoint.
-AI service: health endpoint only.
-See docs/PROGRESS.md for the full status and next steps.
+- **Backend:** built and tested on simulated data.
+- **Mobile app:** welcome screen and live monitor screen run on Android through Expo Go.
+- **AI service:** health endpoint only.
+- **Hardware:** not yet integrated. All current results come from simulated readings.
 
-Note: Simulated telemetry and real sensor data must always be distinguishable.
+## Features
+
+**Sensing and data**
+- Receives telemetry over MQTT and validates every reading against a fixed contract.
+- Stores readings in PostgreSQL.
+- Pushes new readings to connected clients over WebSocket.
+- Serves the latest reading over a REST endpoint, with a freshness flag.
+- Labels every reading as `simulated` or `sensor`. The two are never mixed.
+
+**Analysis**
+- Detects four fault signatures: vibration rise, overheating, abnormal load, and speed deviation.
+- Produces candidate causes with supporting evidence and checks to run. It never reports a confirmed cause.
+
+**Repair and verification**
+- Stores approved repair procedures with source references. Steps are returned only when an approved procedure exists.
+- Compares post-repair readings against a baseline and returns PASS, FAIL, or INCONCLUSIVE.
+- Stores verification results and diagnoses against service cases. Neither changes a case's status. Closing a case is a separate decision.
+
+**Reporting**
+- Builds a case report in JSON or plain text.
+- A repair is reported as verified only when the latest verification is PASS.
+
+**Mobile app (Expo, React Native)**
+- Welcome screen, then a live monitor showing temperature, vibration, current, and speed.
+- Clearly labels simulated data and shows a stale-data warning.
