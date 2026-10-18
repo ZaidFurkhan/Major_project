@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import ConnectionCheckScreen from './src/screens/ConnectionCheckScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import LiveMonitorScreen from './src/screens/LiveMonitorScreen';
 
 export default function App() {
+  const [showWelcome, setShowWelcome] = useState(true);
+
   return (
     <SafeAreaProvider>
-      <ConnectionCheckScreen />
+      {showWelcome ? (
+        <WelcomeScreen onStart={() => setShowWelcome(false)} />
+      ) : (
+        <LiveMonitorScreen />
+      )}
       <StatusBar style="auto" />
     </SafeAreaProvider>
   );
 }
+

@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 18, 2026, the repository contains 42 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 18, 2026, the repository contains 45 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -53,12 +53,11 @@ As of October 18, 2026, the repository contains 42 commits on main, 145 passing 
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The Live Monitor screen and supporting mobile telemetry polling client are implemented in the local working tree:
+The welcome screen and app entry navigation switch are implemented in the local working tree:
 
-- mobile/src/monitorSettings.js: machine identifier and polling interval configuration constants (uncommitted).
-- mobile/src/theme.js: muted dark color palette and layout spacing constants (uncommitted).
-- mobile/src/services/api.js: telemetry endpoint client with fetchLatestTelemetry, timeout, and abort handling (uncommitted).
-- mobile/src/screens/LiveMonitorScreen.js: live telemetry monitor screen with 2x2 metric cards and stale state display (uncommitted).
+- mobile/assets/orbit.jpg: orbit graphic asset from the design export (uncommitted).
+- mobile/src/screens/WelcomeScreen.js: welcome screen with orbit graphic, headline, and start monitoring action (uncommitted).
+- mobile/App.js: application entry point switching between WelcomeScreen and LiveMonitorScreen (uncommitted).
 
 ## 5. Architecture as Built
 
@@ -75,7 +74,7 @@ The Live Monitor screen and supporting mobile telemetry polling client are imple
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 - Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
-- Mobile (React Native/Expo): Live Monitor polls latest telemetry every 2 seconds; muted dark palette; warning colour reserved for anomalies; no diagnosis on phone.
+- Mobile (React Native/Expo): Welcome screen from design export, then Live Monitor; no diagnosis on phone.
 - Local development stack: persistent PostgreSQL, MQTT broker, and simulated publisher started by one script; not a production deployment.
 
 ## 6. Decisions Made
@@ -131,8 +130,7 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Welcome screen integration.
-2. Diagnosis view.
+1. Diagnosis view on the phone.
 
 ## 10. Update Rule
 
