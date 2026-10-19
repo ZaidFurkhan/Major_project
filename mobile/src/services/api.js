@@ -122,3 +122,85 @@ export async function fetchLatestTelemetry(machineId, signal) {
     }
   }
 }
+
+// Maximum duration in milliseconds to wait for a case report response.
+const CASE_REPORT_TIMEOUT_MS = 5000;
+
+export async function fetchCaseReport(caseId, signal) {
+  const controller = new AbortController();
+  const onAbort = () => {
+    controller.abort();
+  };
+
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort();
+    } else {
+      signal.addEventListener('abort', onAbort);
+    }
+  }
+
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, CASE_REPORT_TIMEOUT_MS);
+
+  try {
+    const url = `${BACKEND_BASE_URL}/api/cases/${encodeURIComponent(caseId)}/report`;
+    const response = await fetch(url, {
+      signal: controller.signal,
+    });
+
+    if (response.status === 200) {
+      try {
+        const data = await response.json();
+        return { ok: true, data };
+      } catch {
+        return {
+          ok: false,
+          reason: 'network',
+          error: 'Failed to parse JSON response',
+        };
+      }
+    }
+
+    if (response.status === 404) {
+      return { ok: false, reason: 'not_found' };
+    }
+
+    if (response.status === 400) {
+      return { ok: false, reason: 'invalid_id' };
+    }
+
+    return {
+      ok: false,
+      reason: 'network',
+      error: `Unexpected HTTP status: ${response.status}`,
+    };
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          reason: 'network',
+          error: 'Request aborted',
+        };
+      }
+      return {
+        ok: false,
+        reason: 'network',
+        error: `Request timed out after ${CASE_REPORT_TIMEOUT_MS} ms`,
+      };
+    }
+    return {
+      ok: false,
+      reason: 'network',
+      error: err.message || 'Network request failed',
+    };
+  } finally {
+    clearTimeout(timer);
+    if (signal && signal.removeEventListener) {
+      signal.removeEventListener('abort', onAbort);
+    }
+  }
+}
+
