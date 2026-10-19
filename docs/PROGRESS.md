@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 18, 2026, the repository contains 45 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 18, 2026, the repository contains 47 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -53,11 +53,7 @@ As of October 18, 2026, the repository contains 45 commits on main, 145 passing 
 
 ## 4. Work in Progress (Not Yet Committed)
 
-The welcome screen and app entry navigation switch are implemented in the local working tree:
-
-- mobile/assets/orbit.jpg: orbit graphic asset from the design export (uncommitted).
-- mobile/src/screens/WelcomeScreen.js: welcome screen with orbit graphic, headline, and start monitoring action (uncommitted).
-- mobile/App.js: application entry point switching between WelcomeScreen and LiveMonitorScreen (uncommitted).
+- None. All current code is committed.
 
 ## 5. Architecture as Built
 
@@ -130,7 +126,8 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. Diagnosis view on the phone.
+1. The logo (once the icon file is provided).
+2. The diagnosis view on the phone.
 
 ## 10. Update Rule
 
