@@ -10,7 +10,8 @@
     "start": "node src/server.js",
     "test": "node test/run.js",
     "db:migrate": "node src/db/migrate.js",
-    "dev:stack": "node scripts/dev-stack.js"
+    "dev:stack": "node scripts/dev-stack.js",
+    "db:seed-demo": "node scripts/seed-demo-case.js"
   },
   "dependencies": {
     "aedes": "^1.2.0",
