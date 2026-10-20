@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 18, 2026, the repository contains 54 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 20, 2026, the repository contains 57 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -53,8 +53,8 @@ As of October 18, 2026, the repository contains 54 commits on main, 145 passing 
 
 ## 4. Work in Progress (Not Yet Committed)
 
-- mobile/src/screens/VerificationScreen.js: read-only screen displaying stored repair verification results and uncertainty statement (uncommitted).
-- mobile/App.js: add state switch and bottom bar button to open the verification screen (uncommitted).
+- mobile/src/screens/ReportScreen.js: read-only screen displaying case details, machine information, repair outcome, activity counts, and notes (uncommitted).
+- mobile/App.js: add state switch and bottom bar button to open the report screen (uncommitted).
 
 ## 5. Architecture as Built
 
@@ -127,7 +127,7 @@ Run from ai-service/ after virtual environment creation as documented in ai-serv
 
 ## 9. Next Steps
 
-1. The report view on the phone, then the seed and the demo walkthrough.
+1. Run the demo seed, set CASE_ID locally, check each view on the phone, then fill in the presentation numbers.
 
 ## 10. Update Rule
 
