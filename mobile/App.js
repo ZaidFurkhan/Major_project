@@ -6,12 +6,14 @@ import WelcomeScreen from './src/screens/WelcomeScreen';
 import LiveMonitorScreen from './src/screens/LiveMonitorScreen';
 import DiagnosisScreen from './src/screens/DiagnosisScreen';
 import RepairGuideScreen from './src/screens/RepairGuideScreen';
+import VerificationScreen from './src/screens/VerificationScreen';
 import { colours } from './src/theme';
 
 export default function App() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [showDiagnosis, setShowDiagnosis] = useState(false);
   const [showRepairGuide, setShowRepairGuide] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
 
   return (
     <SafeAreaProvider>
@@ -21,6 +23,8 @@ export default function App() {
         <DiagnosisScreen onBack={() => setShowDiagnosis(false)} />
       ) : showRepairGuide ? (
         <RepairGuideScreen onBack={() => setShowRepairGuide(false)} />
+      ) : showVerification ? (
+        <VerificationScreen onBack={() => setShowVerification(false)} />
       ) : (
         <View style={styles.monitorWrapper}>
           <View style={styles.monitorContent}>
@@ -38,6 +42,12 @@ export default function App() {
               style={styles.repairGuideButton}
             >
               <Text style={styles.repairGuideButtonText}>View repair guide</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setShowVerification(true)}
+              style={styles.verificationButton}
+            >
+              <Text style={styles.verificationButtonText}>View verification</Text>
             </Pressable>
           </SafeAreaView>
         </View>
@@ -80,5 +90,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colours.textSecondary,
   },
+  verificationButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  verificationButtonText: {
+    fontSize: 14,
+    color: colours.textSecondary,
+  },
 });
+
 
