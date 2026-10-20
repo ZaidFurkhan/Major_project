@@ -7,6 +7,7 @@ import LiveMonitorScreen from './src/screens/LiveMonitorScreen';
 import DiagnosisScreen from './src/screens/DiagnosisScreen';
 import RepairGuideScreen from './src/screens/RepairGuideScreen';
 import VerificationScreen from './src/screens/VerificationScreen';
+import ReportScreen from './src/screens/ReportScreen';
 import { colours } from './src/theme';
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
   const [showDiagnosis, setShowDiagnosis] = useState(false);
   const [showRepairGuide, setShowRepairGuide] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   return (
     <SafeAreaProvider>
@@ -25,6 +27,8 @@ export default function App() {
         <RepairGuideScreen onBack={() => setShowRepairGuide(false)} />
       ) : showVerification ? (
         <VerificationScreen onBack={() => setShowVerification(false)} />
+      ) : showReport ? (
+        <ReportScreen onBack={() => setShowReport(false)} />
       ) : (
         <View style={styles.monitorWrapper}>
           <View style={styles.monitorContent}>
@@ -49,6 +53,12 @@ export default function App() {
             >
               <Text style={styles.verificationButtonText}>View verification</Text>
             </Pressable>
+            <Pressable
+              onPress={() => setShowReport(true)}
+              style={styles.reportButton}
+            >
+              <Text style={styles.reportButtonText}>View report</Text>
+            </Pressable>
           </SafeAreaView>
         </View>
       )}
@@ -68,6 +78,7 @@ const styles = StyleSheet.create({
   bottomBar: {
     backgroundColor: colours.background,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 10,
@@ -95,6 +106,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   verificationButtonText: {
+    fontSize: 14,
+    color: colours.textSecondary,
+  },
+  reportButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  reportButtonText: {
     fontSize: 14,
     color: colours.textSecondary,
   },
