@@ -204,3 +204,84 @@ export async function fetchCaseReport(caseId, signal) {
   }
 }
 
+// Maximum duration in milliseconds to wait for a repair guide response.
+const REPAIR_GUIDE_TIMEOUT_MS = 5000;
+
+export async function fetchRepairGuide(faultSignature, signal) {
+  const controller = new AbortController();
+  const onAbort = () => {
+    controller.abort();
+  };
+
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort();
+    } else {
+      signal.addEventListener('abort', onAbort);
+    }
+  }
+
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, REPAIR_GUIDE_TIMEOUT_MS);
+
+  try {
+    const url = `${BACKEND_BASE_URL}/api/repair-guide/${encodeURIComponent(faultSignature)}`;
+    const response = await fetch(url, {
+      signal: controller.signal,
+    });
+
+    if (response.status === 200) {
+      try {
+        const data = await response.json();
+        return { ok: true, data };
+      } catch {
+        return {
+          ok: false,
+          reason: 'network',
+          error: 'Failed to parse JSON response',
+        };
+      }
+    }
+
+    if (response.status === 404) {
+      return { ok: false, reason: 'no_approved_procedure' };
+    }
+
+    if (response.status === 400) {
+      return { ok: false, reason: 'invalid_signature' };
+    }
+
+    return {
+      ok: false,
+      reason: 'network',
+      error: `Unexpected HTTP status: ${response.status}`,
+    };
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      if (signal?.aborted) {
+        return {
+          ok: false,
+          reason: 'network',
+          error: 'Request aborted',
+        };
+      }
+      return {
+        ok: false,
+        reason: 'network',
+        error: `Request timed out after ${REPAIR_GUIDE_TIMEOUT_MS} ms`,
+      };
+    }
+    return {
+      ok: false,
+      reason: 'network',
+      error: err.message || 'Network request failed',
+    };
+  } finally {
+    clearTimeout(timer);
+    if (signal && signal.removeEventListener) {
+      signal.removeEventListener('abort', onAbort);
+    }
+  }
+}
+
