@@ -6,7 +6,7 @@ MechSense is an AI-assisted predictive-maintenance and fault diagnosis system fo
 
 ## 2. Current Status
 
-As of October 21, 2026, the repository contains 60 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
+As of October 21, 2026, the repository contains 63 commits on main, 145 passing backend tests across 20 suites, and 2 passing AI service tests. The core backend pipeline for telemetry simulation, database persistence, MQTT ingestion, WebSocket live broadcast, latest-reading REST query, deterministic anomaly detection, candidate-cause diagnosis, approved repair procedure storage and lookup, post-repair verification decision logic, verification result persistence against service cases, service case reporting, and diagnosis persistence against service cases is implemented, while AI service integrations and mobile interfaces remain in early scaffolding.
 
 ## 3. Completed Work
 
@@ -50,16 +50,41 @@ As of October 21, 2026, the repository contains 60 commits on main, 145 passing 
 | 2026-10-14 | 73bac16 | Add stored diagnosis records for service cases |
 | 2026-10-14 | a20db03 | Include stored diagnoses in case reports |
 | 2026-10-14 | 6bdd25d | Update progress document with diagnosis storage |
+| 2026-10-15 | 35ce4f7 | Add Expo app skeleton with backend connection check |
+| 2026-10-16 | b715585 | Use safe area context for connection check screen |
+| 2026-10-17 | 6e36695 | Update mobile lock file after Expo install check |
+| 2026-10-17 | 88920b8 | Add local development stack script |
+| 2026-10-18 | 402ebd1 | Add theme colours and monitor settings |
+| 2026-10-18 | 5d227bd | Add telemetry fetch with timeout and abort handling |
+| 2026-10-18 | 7217aa1 | Add Live Monitor screen with muted palette and telemetry polling |
+| 2026-10-18 | 8d9edea | Add welcome screen and switch to Live Monitor |
+| 2026-10-18 | 04f0358 | Revise README.md for clarity and project status |
+| 2026-10-19 | fe37b6a | Update progress document with current status |
+| 2026-10-19 | a2a68e6 | Add diagnosis view on phone with case report fetch |
+| 2026-10-19 | 26c7208 | Update progress document with diagnosis view |
+| 2026-10-19 | bdb4715 | Add idempotent demo case seed with stored diagnosis |
+| 2026-10-19 | 75b8a76 | Update progress document with diagnosis view and demo seed |
+| 2026-10-20 | 52db372 | Add repair guide view showing approved steps only |
+| 2026-10-20 | 6c513b1 | Update progress document with repair guide view |
+| 2026-10-20 | 483cf8a | Add verification screen that reads stored case results |
+| 2026-10-20 | 55de31c | Update progress document with verification view |
+| 2026-10-20 | 255a446 | Wire verification view into app navigation |
+| 2026-10-20 | 5ed1abf | Add case report screen with outcome and notes |
+| 2026-10-20 | 7baed98 | Update progress document with report view |
+| 2026-10-20 | 3f9cf9f | Wire report view into app navigation |
+| 2026-10-21 | a2a99a4 | Replace template icons with MechSense logo |
+| 2026-10-21 | 12fa2ef | Set app background colour to match dark theme |
+| 2026-10-21 | c8f6272 | Update progress document with logo |
 
 ## 4. Work in Progress (Not Yet Committed)
 
-- mobile/assets/icon.png, mobile/assets/android-icon-foreground.png, mobile/assets/splash-icon.png: replaced with approved MechSense logo (uncommitted).
-- mobile/app.json: splash backgroundColor and android adaptiveIcon backgroundColor set to #0E0F0E (uncommitted).
+None. All current code is committed.
 
 ## 5. Architecture as Built
 
 - Backend (Node.js/Express): built.
 - AI service (Python/FastAPI): partial. Only health and 404 endpoints are implemented.
+- Knowledge base and RAG: not built, and pgvector is not available in the embedded test database.
 - PostgreSQL schema: built. Machines, service cases, telemetry readings, repair procedures, repair steps, verification results, and diagnoses tables with indexes.
 - MQTT ingestion: built. Subscribes to telemetry topics, validates contracts, verifies machines, and stores deduplicated rows.
 - WebSocket delivery: built. Broadcasts stored readings to connected clients on /ws/telemetry.
@@ -71,7 +96,7 @@ As of October 21, 2026, the repository contains 60 commits on main, 145 passing 
 - Verification decision: pure logic built against baseline; no database storage, no mobile screen.
 - Verification storage: results stored against service cases; case status not changed; no report, no mobile screen.
 - Case report: JSON and text report from stored case, verification, and diagnosis records; no email, no photos, no mobile screen.
-- Mobile (React Native/Expo): Welcome screen from design export, then Live Monitor; no diagnosis on phone.
+- Mobile (React Native/Expo): the welcome, Live Monitor, diagnosis, repair guide, verification, and report screens are built and wired in App.js, and that the phone does no diagnosis or repair logic.
 - Local development stack: persistent PostgreSQL, MQTT broker, and simulated publisher started by one script; not a production deployment.
 
 ## 6. Decisions Made
@@ -101,8 +126,8 @@ As of October 21, 2026, the repository contains 60 commits on main, 145 passing 
 - Live delivery queries the latest row after each stored reading; two closely spaced readings could cause a client to receive a duplicate reading or miss an intermediate update.
 - pgvector is not available in the embedded PostgreSQL package, requiring an alternative environment or service for vector embeddings during RAG implementation.
 - The httpx library produces a deprecation warning in pytest with FastAPI testclient. It does not cause test failure.
-- The backend URL in mobile/src/config.js must be set to the PC's current Wi-Fi address (currently 192.168.0.9), and that Windows Firewall may block port 3000.
-- No hardware or firmware code is implemented yet; mobile client is currently connection check skeleton only.
+- The backend URL in mobile/src/config.js must be set to the PC's current Wi-Fi address, set locally and never committed, and that Windows Firewall may block port 3000.
+- No hardware or firmware code is implemented yet; mobile client includes the six built views (welcome, Live Monitor, diagnosis, repair guide, verification, and report screens).
 - The dev stack needs MECHSENSE_DEV_DB_PASSWORD to be set each session, and that the dev database uses simulated data only.
 
 ## 8. How to Run and Test

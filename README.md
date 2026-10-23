@@ -7,7 +7,7 @@ MechSense is an AI-assisted predictive maintenance system for an industrial moto
 The project is in active development.
 
 - **Backend:** built and tested on simulated data.
-- **Mobile app:** welcome screen and live monitor screen run on Android through Expo Go.
+- **Mobile app:** Welcome, Live Monitor, diagnosis, repair guide, verification, and report screens run on Android through Expo Go.
 - **AI service:** health endpoint only.
 - **Hardware:** not yet integrated. All current results come from simulated readings.
 
@@ -34,5 +34,9 @@ The project is in active development.
 - A repair is reported as verified only when the latest verification is PASS.
 
 **Mobile app (Expo, React Native)**
-- Welcome screen, then a live monitor showing temperature, vibration, current, and speed.
-- Clearly labels simulated data and shows a stale-data warning.
+- Welcome screen to start the application.
+- Live Monitor showing temperature, vibration, current, and speed, with simulated data labeling and stale-data warnings.
+- Diagnosis screen showing candidate causes with supporting evidence and checks to run.
+- Repair guide screen showing approved, source-referenced repair steps for each fault signature.
+- Verification screen showing post-repair verification results and uncertainty statements.
+- Report screen showing case details, verified repair outcome, and diagnostic notes.
